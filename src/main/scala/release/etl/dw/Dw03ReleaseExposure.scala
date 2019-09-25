@@ -12,26 +12,26 @@ import release.util.SparkHelper
   * @author Duyw
   *         Date:2019/09/25  10:28:49
   * @Version ：1.0
-  * @description:DW点击主题
+  * @description:DW投放目标客户主题
   */
-object DwReleaseClick {
+object Dw03ReleaseExposure {
   //日志处理
-  private val logger: Logger = LoggerFactory.getLogger(DwReleaseCustomer.getClass)
+  private val logger: Logger = LoggerFactory.getLogger(Dw01ReleaseCustomer.getClass)
 
-  /**
-    *  点击主题 04
-    * @param spark
-    * @param appName
-    * @param bdh_day
-    */
   def main(args: Array[String]): Unit = {
     val appName = "dw_release_job"
-    val bdp_day_begin = "20190924"
-    val bdp_day_end = "20190924"
+    val bdp_day_begin = "20190920"
+    val bdp_day_end = "20190925"
     // 执行Job
     handleJobs(appName,bdp_day_begin,bdp_day_end)
   }
 
+  /**
+    *  曝光主题  03
+    * @param spark
+    * @param appName
+    * @param bdh_day
+    */
   def handleReleaseJob(spark:SparkSession,appName:String,bdp_day:String)={
     //获取当前时间
     val begin: Long = System.currentTimeMillis()
@@ -45,28 +45,27 @@ object DwReleaseClick {
       val saveMode = SaveMode.Overwrite
 
       //获取日志字段
-      val clickColumns = DwReleaseColumsHelper.selectDwReleaseClick
+      val exposureColumns = DwReleaseColumsHelper.selectDwReleaseExposureColumns
 
 
-      // 设置条件 当天数据 点击用户：04
-      val clickReleaseCondition =
+      // 设置条件 当天数据 曝光主题：03
+      val customerReleaseCondition =
         (col(s"${ReleaseConstant.DEF_PARTITION}")===lit(bdp_day)) and
-      col(s"${ReleaseConstant.COL_RLEASE_SESSION_STATUS}")=== lit(ReleaseStatusEnum.CLICK.getCode)
+      col(s"${ReleaseConstant.COL_RLEASE_SESSION_STATUS}")=== lit(ReleaseStatusEnum.SHOW.getCode)
 
 
-
-      val clickReleaseDF = SparkHelper.readTableData(spark,ReleaseConstant.ODS_RELEASE_SESSION,clickColumns)
+      val exposureReleaseDF = SparkHelper.readTableData(spark,ReleaseConstant.ODS_RELEASE_SESSION,exposureColumns)
         // 填入条件
-        .where(clickReleaseCondition)
+        .where(customerReleaseCondition)
         // 重分区
         .repartition(ReleaseConstant.DEF_SOURCE_PARTITION)
 
 
       println("DWReleaseDF=====================================")
-      clickReleaseDF.show(100,false)
+      exposureReleaseDF.show(100,false)
 
-      //注册用户存储
-      SparkHelper.writetableData(clickReleaseDF,ReleaseConstant.DW_RELEASE_CLICK,saveMode)
+      //目标用户存储
+      SparkHelper.writetableData(exposureReleaseDF,ReleaseConstant.DW_RELEASE_EXPOSURE,saveMode)
     }catch {
       //错误信息处理
       case ex:Exception =>{
@@ -80,7 +79,7 @@ object DwReleaseClick {
 
 
   /**
-    * 点击主题
+    * 投放目标用户
     */
   def handleJobs(appName:String,bdp_day_begin:String,bdp_day_end:String): Unit ={
     var spark:SparkSession =null
@@ -111,7 +110,6 @@ object DwReleaseClick {
       }
     }
   }
-
 
 
 }

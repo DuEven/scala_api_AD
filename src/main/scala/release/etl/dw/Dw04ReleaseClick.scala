@@ -12,21 +12,21 @@ import release.util.SparkHelper
   * @author Duyw
   *         Date:2019/09/25  10:28:49
   * @Version ：1.0
-  * @description:DW注册主题
+  * @description:DW点击主题
   */
-object DwReleaseRegisterUsers {
+object Dw04ReleaseClick {
   //日志处理
-  private val logger: Logger = LoggerFactory.getLogger(DwReleaseCustomer.getClass)
+  private val logger: Logger = LoggerFactory.getLogger(Dw01ReleaseCustomer.getClass)
 
   /**
-    *  注册主题 06
+    *  点击主题 04
     * @param spark
     * @param appName
     * @param bdh_day
     */
   def main(args: Array[String]): Unit = {
     val appName = "dw_release_job"
-    val bdp_day_begin = "20190924"
+    val bdp_day_begin = "20190920"
     val bdp_day_end = "20190924"
     // 执行Job
     handleJobs(appName,bdp_day_begin,bdp_day_end)
@@ -45,28 +45,28 @@ object DwReleaseRegisterUsers {
       val saveMode = SaveMode.Overwrite
 
       //获取日志字段
-      val registerUserColumns = DwReleaseColumsHelper.selectDwReleaseRegisterUserColumns
+      val clickColumns = DwReleaseColumsHelper.selectDwReleaseClick
 
 
-      // 设置条件 当天数据 注册用户：06
-      val registerUserReleaseCondition =
+      // 设置条件 当天数据 点击用户：04
+      val clickReleaseCondition =
         (col(s"${ReleaseConstant.DEF_PARTITION}")===lit(bdp_day)) and
-      col(s"${ReleaseConstant.COL_RLEASE_SESSION_STATUS}")=== lit(ReleaseStatusEnum.REGISTER.getCode)
+      col(s"${ReleaseConstant.COL_RLEASE_SESSION_STATUS}")=== lit(ReleaseStatusEnum.CLICK.getCode)
 
 
 
-      val registerUserReleaseDF = SparkHelper.readTableData(spark,ReleaseConstant.ODS_RELEASE_SESSION,registerUserColumns)
+      val clickReleaseDF = SparkHelper.readTableData(spark,ReleaseConstant.ODS_RELEASE_SESSION,clickColumns)
         // 填入条件
-        .where(registerUserReleaseCondition)
+        .where(clickReleaseCondition)
         // 重分区
         .repartition(ReleaseConstant.DEF_SOURCE_PARTITION)
 
 
       println("DWReleaseDF=====================================")
-      registerUserReleaseDF.show(100,false)
+      clickReleaseDF.show(100,false)
 
       //注册用户存储
-      SparkHelper.writetableData(registerUserReleaseDF,ReleaseConstant.DW_RELEASE_REGISTER_USER,saveMode)
+      SparkHelper.writetableData(clickReleaseDF,ReleaseConstant.DW_RELEASE_CLICK,saveMode)
     }catch {
       //错误信息处理
       case ex:Exception =>{

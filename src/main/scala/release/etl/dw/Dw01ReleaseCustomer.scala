@@ -14,9 +14,9 @@ import release.util.SparkHelper
   * @Version ：1.0
   * @description:DW投放目标客户主题
   */
-object DwReleaseCustomer {
+object Dw01ReleaseCustomer {
   //日志处理
-  private val logger: Logger = LoggerFactory.getLogger(DwReleaseCustomer.getClass)
+  private val logger: Logger = LoggerFactory.getLogger(Dw01ReleaseCustomer.getClass)
 
   /**
     *  目标客户  01
@@ -107,7 +107,7 @@ object DwReleaseCustomer {
 
   def main(args: Array[String]): Unit = {
     val appName = "dw_release_job"
-    val bdp_day_begin = "20190924"
+    val bdp_day_begin = "20190920"
     val bdp_day_end = "20190924"
     // 执行Job
     handleJobs(appName,bdp_day_begin,bdp_day_end)
