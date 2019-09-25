@@ -11,7 +11,64 @@ import scala.collection.mutable.ArrayBuffer
 object DwReleaseColumsHelper {
 
   /**
-    * 目标用户啊
+    * 点击主题  04
+    * @return
+    */
+  def selectDwReleaseClick = {
+    val columns = new ArrayBuffer[String]()
+    columns.+=("release_session")
+    columns.+=("release_status")
+    columns.+=("device_num")
+    columns.+=("device_type")
+    columns.+=("sources")
+    columns.+=("channels")
+    columns.+=("ct")
+    columns.+=("bdp_day")
+    columns
+  }
+
+
+  /**
+    * 注册用户主题
+    *
+    * @return
+    */
+  def selectDwReleaseRegisterUserColumns = {
+    val columns = new ArrayBuffer[String]()
+    columns.+=("get_json_object(exts,'$.user_register') as user_register")
+    columns.+=("release_session")
+    columns.+=("release_status")
+    columns.+=("device_num")
+    columns.+=("device_type")
+    columns.+=("sources")
+    columns.+=("channels")
+    columns.+=("ct")
+    columns.+=("bdp_day")
+    columns
+  }
+
+
+  /**
+    * 曝光用户
+    *
+    * @return
+    */
+  def selectDwReleaseExposureColumns:ArrayBuffer[String] = {
+    val columns = new ArrayBuffer[String]()
+    columns.+=("release_session")
+    columns.+=("release_status")
+    columns.+=("device_num")
+    columns.+=("device_type")
+    columns.+=("sources")
+    columns.+=("channels")
+    columns.+=("ct")
+    columns.+=("bdp_day")
+    columns
+  }
+
+
+  /**
+    * 目标用户
     *
     */
   def selectDwReleaseCustomerColumns:ArrayBuffer[String] ={

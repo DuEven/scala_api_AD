@@ -59,7 +59,7 @@ object DwReleaseCustomer {
       customerReleaseDF.show(100,false)
 
       //目标用户存储
-      //SparkHelper.writetableData(customerReleaseDF,ReleaseConstant.DW_RELEASE_CUSTOMER,saveMode)
+      SparkHelper.writetableData(customerReleaseDF,ReleaseConstant.DW_RELEASE_CUSTOMER,saveMode)
     }catch {
       //错误信息处理
       case ex:Exception =>{
@@ -91,7 +91,7 @@ object DwReleaseCustomer {
         .setMaster("local[*]")
       // 创建上下文
       spark = SparkHelper.createSpark(conf)
-      // 解析参数
+      // 解析参数    求出需要参与计算的天数
       val timeRange = SparkHelper.rangeDates(bdp_day_begin,bdp_day_end)
       // 循环参数
       for(bdp_day <- timeRange){

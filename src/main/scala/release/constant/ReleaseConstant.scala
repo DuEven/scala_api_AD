@@ -24,6 +24,17 @@ object ReleaseConstant {
   val ODS_RELEASE_SESSION = "ods_release.ods_01_release_session"
 
   //dw
+  //目标用户主题
   val DW_RELEASE_CUSTOMER = "dw_release.dw_release_customer"
+
+  //曝光主题
+  val DW_RELEASE_EXPOSURE = "dw_release.dw_release_exposure"
+
+  //注册主题
+  val DW_RELEASE_REGISTER_USER = "dw_release.dw_release_register_users"
+
+  //点击主题
+  val DW_RELEASE_CLICK = "dw_release.dw_release_click"
+
 
 }
