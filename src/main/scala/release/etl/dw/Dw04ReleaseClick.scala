@@ -27,7 +27,7 @@ object Dw04ReleaseClick {
   def main(args: Array[String]): Unit = {
     val appName = "dw_release_job"
     val bdp_day_begin = "20190920"
-    val bdp_day_end = "20190924"
+    val bdp_day_end = "20190926"
     // 执行Job
     handleJobs(appName,bdp_day_begin,bdp_day_end)
   }
@@ -41,7 +41,7 @@ object Dw04ReleaseClick {
 
       //设置缓存级别
       //集市的时候可以作缓存，dm    ods  无法做缓存，数据量太大
-      val storagelevel: StorageLevel = ReleaseConstant.SEF_STORAGE_LEVEL
+      val storagelevel: StorageLevel = ReleaseConstant.DEF_STORAGE_LEVEL
       val saveMode = SaveMode.Overwrite
 
       //获取日志字段

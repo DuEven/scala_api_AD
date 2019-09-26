@@ -13,7 +13,7 @@ import org.apache.spark.storage.StorageLevel
 object ReleaseConstant {
 
   //partition      存储内除   执行内存
-  val SEF_STORAGE_LEVEL: StorageLevel = StorageLevel.MEMORY_AND_DISK
+  val DEF_STORAGE_LEVEL: StorageLevel = StorageLevel.MEMORY_AND_DISK
   val DEF_PARTITION:String = "bdp_day"
   val DEF_SOURCE_PARTITION = 4
 
