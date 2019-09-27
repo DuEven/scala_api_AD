@@ -1,10 +1,10 @@
 package release.etl.dm
 
 import release.constant.ReleaseConstant
-import release.util.SparkHelper
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{Column, SaveMode, SparkSession}
 import org.slf4j.{Logger, LoggerFactory}
+import release.util.SparkHelper
 
 /**
   * 投放目标客户数据集市
@@ -20,6 +20,8 @@ object DMReleaseCustomer{
     // 执行Job
     handleJobs(appName,bdp_day_begin,bdp_day_end)
   }
+
+
 
   /**
     * 统计目标客户集市
@@ -46,6 +48,8 @@ object DMReleaseCustomer{
     println("DW========================")
     customerReleaseDF.show(10,false)
 
+
+
     // 统计渠道指标
     val customerSourceGroupColnmus = Seq[Column](
       $"${ReleaseConstant.COL_RELEASE_SOURCES}",
@@ -68,10 +72,12 @@ object DMReleaseCustomer{
       .selectExpr(customerSourceColumns:_*)
     // 打印
     println("DM_Source=============================")
-    customerSourceDMDF.show(10,false)
+    customerSourceDMDF.show(100,false)
     // 写入hive
-   // SparkHelper.writeTableData(
-    // customerSourceDMDF,ReleaseConstant.DM_RELEASE_CUSTOMER_SOURCE,saveMode)
+    SparkHelper.writetableData(customerSourceDMDF,ReleaseConstant.DM_RELEASE_CUSTOMER_SOURCE,saveMode)
+
+
+
 
     // 目标客户多维度分析统计
     val customerGroupColumns = Seq[Column](
@@ -97,8 +103,10 @@ object DMReleaseCustomer{
       .withColumn(s"${ReleaseConstant.DEF_PARTITION}",lit(bdp_day))
       // 所有维度列
       .selectExpr(customerCubeColumns:_*)
-    // 存入Hive
-    //SparkHelper.writeTableData(customerCubeDF,ReleaseConstant.DM_RELEASE_CUSTOMER_CUBE,saveMode)
+
+      customerCubeDF.show(100,false)
+      // 存入Hive
+      SparkHelper.writetableData(customerCubeDF,ReleaseConstant.DM_RELEASE_CUSTOMER_CUBE,saveMode)
    }catch {
       case ex:Exception=>{
         logger.error(ex.getMessage,ex)
@@ -107,6 +115,10 @@ object DMReleaseCustomer{
       println(s"任务处理时长：${appName},bdp_day = ${bdp_day}, ${System.currentTimeMillis() - begin}")
     }
   }
+
+
+
+
   /**
     * 投放目标用户
     */

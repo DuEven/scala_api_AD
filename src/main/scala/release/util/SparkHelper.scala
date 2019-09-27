@@ -3,6 +3,7 @@ package release.util
 import org.apache.spark.SparkConf
 import org.apache.spark.sql.{DataFrame, SaveMode, SparkSession}
 import org.slf4j.{Logger, LoggerFactory}
+import release.etl.udf.QFUdf
 
 import scala.collection.mutable
 import scala.collection.mutable.ArrayBuffer
@@ -18,6 +19,17 @@ object SparkHelper {
     * 读取数据
     */
   private val logger: Logger = LoggerFactory.getLogger(SparkHelper.getClass)
+
+/*  def readJoinTableData(spark:SparkSession,tableName1:String,table2Name:String,same:List[String],colNames:mutable.Seq[String]):DataFrame={
+    import spark.implicits._
+    //获取数据
+    val tableDF1: DataFrame = spark.read.table(tableName1)
+      .selectExpr(colNames:_*)
+    val tableDF2: DataFrame = spark.read.table(tableName1)
+      .selectExpr(colNames:_*)
+    val tableDF: DataFrame = tableDF1.join(tableDF2,tableDF1(same(0)) === tableDF2(same(0)))
+    tableDF
+  }*/
 
   def readTableData(spark:SparkSession,tableName:String,colNames:mutable.Seq[String]):DataFrame={
     import spark.implicits._
@@ -44,8 +56,19 @@ object SparkHelper {
       .config(conf)
       .enableHiveSupport()
       .getOrCreate()
+
     // 加载自定义函数
+    regissterFun(spark)
+
     spark
+  }
+
+  /**
+    * udf 注册
+    */
+  def regissterFun(spark:SparkSession)={
+    //处理年龄段
+    spark.udf.register("getAgeRange",QFUdf.getAgeRange _ )
   }
 
 
