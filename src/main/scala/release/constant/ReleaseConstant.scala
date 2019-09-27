@@ -29,9 +29,15 @@ object ReleaseConstant {
   val COL_RELEASE_AGE_RANGE = "age_range"
   val COL_RELEASE_GENDER = "gender"
   val COL_RELEASE_AREA_CODE = "area_code"
+  val COL_RELEASE_AID = "aid"
+
 
   val COL_RELEASE_EXPOSURE_COUNT = "exposure_count"
+
+
   val COL_RELEASE_EXPOSURE_RANTS = "exposure_rates"
+
+  val COL_RELEASE_CLICK_COUNT = "total_count"
 
   val COL_RELEASE_DEVICE_NUM_EXPOURSE = " dw_release.dw_release_exposure('device_num') "
 
@@ -61,7 +67,13 @@ object ReleaseConstant {
 
   //曝光渠道统计
   val DM_RELEASE_EXPOSURE_SOURCE = "dm_release.dm_exposure_sources"
+
+  //曝光多维度分析统计
   val DM_RELEASE_EXPOSURE_CUBE = "dm_release.dm_exposure_cube"
+
+  //点击渠道
+  val DM_RELEASE_CLICK_CUBE = "dm_release.dm_release_click_cube"
+
 
 
 }

@@ -9,9 +9,9 @@ import release.util.SparkHelper
 /**
   *  曝光集市表
   */
-object DMReleaseExposure{
+object DMReleaseClick{
   // 日志
-  private val logger: Logger = LoggerFactory.getLogger(DMReleaseExposure.getClass)
+  private val logger: Logger = LoggerFactory.getLogger(DMReleaseClick.getClass)
 
   def main(args: Array[String]): Unit = {
     val appName = "dm_release_job"
@@ -38,91 +38,69 @@ object DMReleaseExposure{
     val saveMode = SaveMode.Overwrite
     val storageLevel = ReleaseConstant.DEF_STORAGE_LEVEL
 
-    // 获取日志数据
-    val exposureColumns = DMReleaseColumnsHelper.selectDWReleaseExposureColumns()
-    val customerColumns = DMReleaseColumnsHelper.selectDWReleaseCustomerColumns()
 
+    //1
+    // 获取日志数据
+    val clickColumns = DMReleaseColumnsHelper.selectDWReleaseClickColumns()
+    val customerColumns = DMReleaseColumnsHelper.selectDWReleaseCustomerColumns2()
+
+
+
+    //2
     // 获取当天数据
     val dateCondition =col(s"${ReleaseConstant.DEF_PARTITION}")===lit(bdp_day)
 
-    //todo 读取曝光表
-    val exposureReleaseDF = SparkHelper.readTableData(spark,ReleaseConstant.DW_RELEASE_EXPOSURE,exposureColumns)
+
+    //3
+    //todo 读取点击表
+    val clickReleaseDF = SparkHelper.readTableData(spark,ReleaseConstant.DW_RELEASE_CLICK,clickColumns)
     //val exposureReleaseDF = SparkHelper.readJoinTableData(spark,ReleaseConstant.DW_RELEASE_CUSTOMER,ReleaseConstant.DW_RELEASE_EXPOSURE,str,exposureColumns)
       .where(dateCondition)
       .persist(storageLevel)
-
     //todo 读取用户表
     val customerReleaseDF = SparkHelper.readTableData(spark,ReleaseConstant.DW_RELEASE_CUSTOMER,customerColumns)
       .where(dateCondition)
       .persist(storageLevel)
 
-    val exposureJoinCustomerDF: DataFrame = exposureReleaseDF
-      .join(customerReleaseDF,exposureReleaseDF("device_num")===customerReleaseDF("device_num"),"left")
+    //4
+    val clickJoinCustomerDF: DataFrame = clickReleaseDF
+      .join(customerReleaseDF,clickReleaseDF("device_num")===customerReleaseDF("device_num"),"left")
 
     println("DW========================")
 
-    //println("aaaaaaaaaaaaaaaa"+ exposureJoinCustomerDF.count())
+    //todo  以上完成表的 join操作 形成一个宽表
+    clickJoinCustomerDF.show(10,false)
 
-    //exposureJoinCustomerDF.show(10,false)
+
+
 
 
    //todo  1 统计渠道指标
-    val exposureSourceGroupColnmus = Seq[Column](
+    val clickGroupColnmus = Seq[Column](
       $"${ReleaseConstant.COL_RELEASE_SOURCES}",
       $"${ReleaseConstant.COL_RELEASE_CHANNELS}",
-      $"${ReleaseConstant.COL_RELEASE_DEVICE_TYPE}")
+      $"${ReleaseConstant.COL_RELEASE_AGE_RANGE}",
+      $"${ReleaseConstant.COL_RELEASE_AID}"
+    )
 
     // 插入列
-    val exposureSourceColumns = DMReleaseColumnsHelper.selectDMCustomerExposureColumns()
+    val clickSourceColumns = DMReleaseColumnsHelper.selectDMClickColumns()
     // 按照需求分组，进行聚合
-    val exposureSourceDMDF = exposureJoinCustomerDF.groupBy(exposureSourceGroupColnmus:_*)
+    val clickSourceDMDF = clickJoinCustomerDF.groupBy(clickGroupColnmus:_*)
       .agg(
-        countDistinct(exposureReleaseDF(ReleaseConstant.COL_RELEASE_DEVICE_NUM))
-          .alias(s"${ReleaseConstant.COL_RELEASE_EXPOSURE_COUNT}"),
-        (countDistinct(exposureReleaseDF(ReleaseConstant.COL_RELEASE_DEVICE_NUM))/
-        count(exposureReleaseDF(ReleaseConstant.COL_RELEASE_DEVICE_NUM)))
-          .alias(s"${ReleaseConstant.COL_RELEASE_EXPOSURE_RANTS}")
+        count(customerReleaseDF(ReleaseConstant.COL_RELEASE_DEVICE_NUM))
+          .alias(s"${ReleaseConstant.COL_RELEASE_CLICK_COUNT}")
       )
     // 按照条件查询
       .withColumn(s"${ReleaseConstant.DEF_PARTITION}",lit(bdp_day))
       // 所有维度列
-      .selectExpr(exposureSourceColumns:_*)
+      .selectExpr(clickSourceColumns:_*)
     // 打印
-    println("DM_Source=============================")
-    exposureSourceDMDF.show(100,false)
+    println("DM_Click=============================")
+    clickSourceDMDF.show(100,false)
     // 写入hive
-    SparkHelper.writetableData(exposureSourceDMDF,ReleaseConstant.DM_RELEASE_EXPOSURE_SOURCE,saveMode)
+    SparkHelper.writetableData(clickSourceDMDF,ReleaseConstant.DM_RELEASE_CLICK_CUBE,saveMode)
 
-
-
-
-    // todo 2目标客户多维度分析统计
-    val exposureGroupColnmus = Seq[Column](
-      $"${ReleaseConstant.COL_RELEASE_SOURCES}",
-      $"${ReleaseConstant.COL_RELEASE_CHANNELS}",
-      $"${ReleaseConstant.COL_RELEASE_DEVICE_TYPE}",
-      $"${ReleaseConstant.COL_RELEASE_AGE_RANGE}",
-      $"${ReleaseConstant.COL_RELEASE_GENDER}",
-      $"${ReleaseConstant.COL_RELEASE_AREA_CODE}"
-    )
-    // 插入列
-    val exposureCubeColumns = DMReleaseColumnsHelper.selectDMExposureCudeColumns()
-    // 统计聚合
-    val exposureCubeDF = exposureJoinCustomerDF.groupBy(exposureGroupColnmus: _* )
-      .agg(
-        countDistinct(exposureReleaseDF(ReleaseConstant.COL_RELEASE_DEVICE_NUM))
-          .alias(s"${ReleaseConstant.COL_RELEASE_EXPOSURE_COUNT}"),
-        (countDistinct(exposureReleaseDF(ReleaseConstant.COL_RELEASE_DEVICE_NUM))/
-          count(exposureReleaseDF(ReleaseConstant.COL_RELEASE_DEVICE_NUM)))
-          .alias(s"${ReleaseConstant.COL_RELEASE_EXPOSURE_RANTS}")
-      )
-      // 按照条件查询
-      .withColumn(s"${ReleaseConstant.DEF_PARTITION}",lit(bdp_day))
-      // 所有维度列
-      .selectExpr(exposureCubeColumns:_*)
-    exposureCubeDF.show(100,false)
-      // 存入Hive
-      SparkHelper.writetableData(exposureCubeDF,ReleaseConstant.DM_RELEASE_EXPOSURE_CUBE,saveMode)
 
 
 
